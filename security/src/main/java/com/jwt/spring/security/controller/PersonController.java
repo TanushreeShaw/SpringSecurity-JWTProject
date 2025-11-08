@@ -1,6 +1,7 @@
 package com.jwt.spring.security.controller;
 
 import com.jwt.spring.security.dto.AuthenticationRequest;
+import com.jwt.spring.security.endpoint.PersonEndpoint;
 import com.jwt.spring.security.service.PersonDetailsServiceImpl;
 import com.jwt.spring.security.utils.JwtUtils;
 import org.springframework.http.HttpStatus;
@@ -9,14 +10,17 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * PersonController handles authentication and user verification endpoints.
+ * It provides endpoints to generate JWT tokens and verify user details.
+ */
 @RestController
-public class PersonController {
+public class PersonController implements PersonEndpoint {
 
     private final AuthenticationManager authManager;
     private final PersonDetailsServiceImpl userDetailsService;
@@ -30,37 +34,49 @@ public class PersonController {
         this.jwtUtils = jwtUtils;
     }
 
-    @PostMapping("/authenticate")
-    public ResponseEntity<?> generateToken(@RequestBody AuthenticationRequest request) {
+    /**
+     * Generates a JWT token for the authenticated user.
+     *
+     * @param authenticationRequest the authentication request containing username and password
+     * @return a ResponseEntity containing the JWT token or an error message
+     */
+    @Override
+    public ResponseEntity<?> generateToken(AuthenticationRequest authenticationRequest) {
+
         try {
-            authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUserName(), request.getPassword())
+            authManager.authenticate(new UsernamePasswordAuthenticationToken(authenticationRequest.getUserName(),
+                    authenticationRequest.getPassword())
             );
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
 
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUserName());
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getUserName());
         final String token = jwtUtils.generateToken(userDetails);
 
         return ResponseEntity.ok(Map.of("token", token));
     }
 
-    @GetMapping("/verify")
-    public ResponseEntity<?> getUserDetails() {
+    /**
+     * Verifies the JWT token and retrieves user details.
+     *
+     * @return a ResponseEntity containing user details or an error message
+     */
+    @Override
+    public ResponseEntity<Map<String, Object>> getUserDetails() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Map<String, Object> response = new LinkedHashMap<>();
+        Map<String, Object> userDetailsResponse = new LinkedHashMap<>();
         if (principal instanceof UserDetails) {
             UserDetails userDetails = (UserDetails) principal;
-            response.put("message", "Here is your original login information based on the JWT");
-            response.put("username", userDetails.getUsername());
-            response.put("password", userDetails.getPassword()); // original password is usually encoded
+            userDetailsResponse.put("message", "Here is your original login information based on the JWT");
+            userDetailsResponse.put("username", userDetails.getUsername());
+            userDetailsResponse.put("password", userDetails.getPassword());
         } else {
-            response.put("message", "No authenticated user found");
+            userDetailsResponse.put("message", "No authenticated user found");
         }
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(userDetailsResponse);
     }
 
 }

@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * SecurityApplication is the main entry point for the Spring Boot application.
+ * It initializes the application context and populates the database with sample Person data.
+ */
 @SpringBootApplication
 public class SecurityApplication {
 
@@ -19,12 +23,10 @@ public class SecurityApplication {
 		this.personDao = personDao;
 	}
 
-	/*@PostConstruct
-	public void init() {
-		Person person = new Person(1L, "user1", "password1", "user1@example.com");
-		personDao.save(person);
-	}*/
-
+	/**
+	 * Initializes the database with a list of sample Person entities after the application starts.
+	 * This method is annotated with @PostConstruct to ensure it runs after dependency injection is complete.
+	 */
 	@PostConstruct
 	public void initPersonsList() {
 		List<Person> personList = Stream.of(
@@ -38,6 +40,11 @@ public class SecurityApplication {
 		personDao.saveAll(personList);
 	}
 
+	/**
+	 * The main method that starts the Spring Boot application.
+	 *
+	 * @param args command-line arguments
+	 */
 	public static void main(String[] args) {
 		SpringApplication.run(SecurityApplication.class, args);
 	}

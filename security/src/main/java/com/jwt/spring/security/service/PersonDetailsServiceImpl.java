@@ -8,6 +8,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+/**
+ * PersonDetailsServiceImpl is an implementation of UserDetailsService
+ * that loads user-specific data from the PersonDao.
+ */
 @Service
 public class PersonDetailsServiceImpl implements UserDetailsService {
 
@@ -17,6 +21,13 @@ public class PersonDetailsServiceImpl implements UserDetailsService {
         this.personDao = personDao;
     }
 
+    /**
+     * Loads the user by username and constructs a UserDetails object.
+     *
+     * @param username the username identifying the user whose data is required.
+     * @return a fully populated UserDetails object (never null)
+     * @throws UsernameNotFoundException if the user could not be found
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Person person = personDao.findByUserName(username)

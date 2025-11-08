@@ -6,6 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Person entity represents a user in the system with fields for id, username, password, and email.
+ * It is mapped to a database table using JPA annotations.
+ */
 @Entity
 @Data
 @NoArgsConstructor

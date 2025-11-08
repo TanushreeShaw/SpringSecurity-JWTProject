@@ -15,6 +15,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * JwtFilter is a custom filter that intercepts HTTP requests to validate JWT tokens.
+ * It extends OncePerRequestFilter to ensure that it is executed once per request.
+ */
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -26,16 +30,24 @@ public class JwtFilter extends OncePerRequestFilter {
         this.personDetailsService = personDetailsService;
     }
 
+    /**
+     * This method filters incoming HTTP requests to validate JWT tokens.
+     * If a valid token is found, it sets the authentication in the security context.
+     *
+     * @param httpServletRequest the incoming HTTP request
+     * @param httpServletResponse the outgoing HTTP response
+     * @param filterChain the filter chain to continue processing
+     * @throws ServletException if an error occurs during filtering
+     * @throws IOException if an I/O error occurs during filtering
+     */
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
+    protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
+        final String authHeader = httpServletRequest.getHeader("Authorization");
         String username = null;
         String token = null;
 
-        // Check if header is present and starts with Bearer
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7); // Remove "Bearer "
             try {
@@ -45,7 +57,6 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        // Validate token and set authentication
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = personDetailsService.loadUserByUsername(username);
 
@@ -53,12 +64,11 @@ public class JwtFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
-        // Continue filter chain
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(httpServletRequest, httpServletResponse);
     }
 }

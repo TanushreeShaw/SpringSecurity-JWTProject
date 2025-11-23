@@ -1,6 +1,7 @@
 package com.jwt.spring.security.endpoint;
 
 import com.jwt.spring.security.dto.AuthenticationRequest;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +17,7 @@ import java.util.Map;
 @RequestMapping("/person")
 public interface PersonEndpoint {
 
-    @PostMapping(value = "/authenticate", produces = "application/json")
+    @PostMapping(value = "/authenticate", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<?> generateToken(@RequestBody AuthenticationRequest authRequest);
 
     @GetMapping("/verify")

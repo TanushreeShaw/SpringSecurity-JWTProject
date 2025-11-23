@@ -64,11 +64,11 @@ public class PersonController implements PersonEndpoint {
      */
     @Override
     public ResponseEntity<Map<String, Object>> getUserDetails() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Object userDetail = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Map<String, Object> userDetailsResponse = new LinkedHashMap<>();
-        if (principal instanceof UserDetails) {
-            UserDetails userDetails = (UserDetails) principal;
+        if (userDetail instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) userDetail;
             userDetailsResponse.put("message", "Here is your original login information based on the JWT");
             userDetailsResponse.put("username", userDetails.getUsername());
             userDetailsResponse.put("password", userDetails.getPassword());
